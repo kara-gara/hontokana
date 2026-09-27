@@ -25,6 +25,12 @@ let step = null;   // { item, mode, confidence }
 let busy = false;  // 演出中は入力を受け付けない
 let guessRun = { hit: 0, miss: 0 }; // 予想の連続的中・連続ハズレ
 
+// 利用状況の匿名カウント（GoatCounter）。回数だけを数え、回答内容は送らない。
+// スクリプトが読み込まれていない・ブロックされている環境では何もしない。
+function track(name, title) {
+  try { window.goatcounter?.count?.({ path: `event/${name}`, title: title ?? name, event: true }); } catch { /* 集計できなくても続行 */ }
+}
+
 function show(name) {
   for (const s of screens) $(`screen-${s}`).hidden = s !== name;
   window.scrollTo({ top: 0 });
@@ -292,7 +298,10 @@ function renderShare(r) {
   $("share-preview").textContent = text;
   $("share-x").href = `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
   $("share-line").href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+  $("share-x").onclick = () => track("share-x", "Xでシェア");
+  $("share-line").onclick = () => track("share-line", "LINEでシェア");
   $("share-copy").onclick = async () => {
+    track("share-copy", "テキストをコピー");
     try {
       await navigator.clipboard.writeText(`${text}\n${url}`);
       $("share-copy").textContent = "コピーしました！";
@@ -302,7 +311,10 @@ function renderShare(r) {
     setTimeout(() => { $("share-copy").textContent = "テキストをコピー"; }, 1800);
   };
   $("share-native").hidden = !navigator.share;
-  $("share-native").onclick = () => navigator.share({ title: document.title, text, url }).catch(() => {});
+  $("share-native").onclick = () => {
+    track("share-native", "その他で共有");
+    navigator.share({ title: document.title, text, url }).catch(() => {});
+  };
 }
 
 async function countUp(node, to) {
@@ -316,6 +328,7 @@ async function countUp(node, to) {
 
 function renderResult() {
   const r = engine.result();
+  track(engine.isRoundOver() ? "finish" : "finish-early", engine.isRoundOver() ? "結果まで到達" : "途中で結果を見た");
   const { matched, unsure, clear, straightLine, topBias, guesses } = r;
 
   const res = $("screen-result");
@@ -400,6 +413,7 @@ function onMascotTap(host, target) {
 }
 
 async function start() {
+  track("start", "挑戦する");
   engine = createEngine(data);
   guessRun = { hit: 0, miss: 0 };
   roundStart = 0;
@@ -429,7 +443,7 @@ async function init() {
   $("btn-back").addEventListener("click", onBack);
   $("btn-finish").addEventListener("click", () => { if (!busy && engine) renderResult(); });
   $("btn-restart").addEventListener("click", renderStart);
-  $("btn-more").addEventListener("click", () => { roundStart = engine.askedCount; engine.extend(); renderStep(line("more")); });
+  $("btn-more").addEventListener("click", () => { track("more", "もっと質問に答える"); roundStart = engine.askedCount; engine.extend(); renderStep(line("more")); });
 
   // キーボード：数字キーで回答、Backspaceで戻る
   document.addEventListener("keydown", (e) => {

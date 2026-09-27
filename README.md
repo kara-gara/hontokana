@@ -33,6 +33,16 @@ python -m http.server 8000
 
 結果画面に X / LINE / テキストコピー /（スマホでは）OS標準の共有ボタンがあります。送られるのは「見つかった数・心のクセNo.1・予想の的中数」とページURLだけで、個々の回答は含みません。
 
+### アクセス集計（GoatCounter）
+
+集計ページ：https://hontokana.goatcounter.com （ログインが必要）
+
+- ページの閲覧数・参照元（X・ブログなど）・端末の種類
+- ボタン操作の回数：`event/start`（挑戦する）、`event/finish`（結果まで到達）、`event/finish-early`（途中で結果を見た）、`event/more`（もっと質問に答える）、`event/share-x` / `share-line` / `share-copy` / `share-native`（シェア）
+
+Cookieは使わず、個人も特定しません。回答内容や診断結果は送りません。localhost では自動的に数えません。
+計測を止めたいときは、`index.html` 末尾の GoatCounter の `<script>` を消すだけです（`track()` は読み込まれていなければ何もしません）。
+
 ### ブログに埋め込む
 
 ```html
