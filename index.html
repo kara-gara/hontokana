@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ほんとかな？ 思い込みさがし</title>
+  <meta name="description" content="案内役のホントカナが質問しながら、あなたが気づかずに信じているかもしれない疑似科学や思い込みを当てにいきます。そう感じる理由と実際の知見もあわせて紹介します。">
+  <meta name="theme-color" content="#f6f1e7">
+  <!-- SNSでリンクを貼ったときのカード（公開URLを変えたらここも変える） -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ほんとかな？ 思い込みさがし">
+  <meta property="og:title" content="ほんとかな？ 思い込みさがし">
+  <meta property="og:description" content="案内役のホントカナが、あなたが気づかずに信じている思い込みを当てにいきます。そう感じる理由（心のクセ）と実際の知見もわかる、科学リテラシーの診断ゲーム。">
+  <meta property="og:url" content="https://kara-gara.github.io/hontokana/">
+  <meta property="og:image" content="https://kara-gara.github.io/hontokana/ogp.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23e9724c'/><text x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'>?</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main id="app" class="app">
+
+    <!-- スタート画面 -->
+    <section id="screen-start" class="screen" hidden>
+      <div class="hero">
+        <div id="mascot-start" class="mascot-host big"></div>
+        <div id="greeting" class="speech speech-start"></div>
+        <h1>ほんとかな？<span>思い込みさがし</span></h1>
+        <ul class="points">
+          <li>直感で答えるだけ・1回10問で約2分</li>
+          <li>ときどきホントカナが先回りして当てにきます</li>
+          <li>答えはどこにも送信されません</li>
+        </ul>
+        <button id="btn-start" class="btn btn-primary btn-large" type="button">挑戦する</button>
+        <p id="collection-teaser" class="teaser" hidden></p>
+      </div>
+    </section>
+
+    <!-- 質問画面 -->
+    <section id="screen-question" class="screen" hidden>
+      <div class="q-head">
+        <button id="btn-back" class="btn-text" type="button">← 戻る</button>
+        <span id="q-count" class="q-count"></span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div id="progress-bar"></div></div>
+
+      <div class="stage">
+        <div class="stage-side">
+          <div id="mascot-q" class="mascot-host"></div>
+          <div class="hunch" title="ピンと来てる度">
+            <div class="hunch-label">ピン度</div>
+            <div class="hunch-track"><div id="hunch-bar"></div></div>
+          </div>
+        </div>
+        <div id="q-card" class="q-card" aria-live="polite">
+          <span id="q-note" class="q-note" hidden></span>
+          <p id="q-aside" class="q-aside"></p>
+          <p id="q-text" class="q-text"></p>
+        </div>
+      </div>
+
+      <div id="answers" class="answers" role="group" aria-label="回答"></div>
+
+      <button id="btn-finish" class="btn-text finish" type="button">ここで結果を見る</button>
+    </section>
+
+    <!-- 結果画面 -->
+    <section id="screen-result" class="screen" hidden>
+      <div class="reveal">
+        <div id="mascot-result" class="mascot-host big"></div>
+        <p id="result-speech" class="speech speech-result"></p>
+        <p class="reveal-intro">あなたの中に見つかった<br>「思い込みかも」は……</p>
+        <p class="reveal-count"><span id="reveal-num">0</span><small>つ</small></p>
+        <p id="result-lead" class="lead reveal-lead"></p>
+      </div>
+
+      <div class="after-reveal">
+        <div id="straight-notice" class="notice" role="note" hidden>
+          <strong id="straight-title"></strong>
+          <p>質問の中には、「はい」と答えると正しい理解になるものも混ざっています。同じ答えを続けると結果が正確にならないので、よければ1問ずつ読んでもう一度試してみてください。</p>
+        </div>
+
+        <div class="stats">
+          <div id="top-bias" class="stat top-bias" hidden>
+            <div class="stat-label">あなたの心のクセ No.1</div>
+            <div id="top-bias-name" class="stat-value"></div>
+            <div id="top-bias-catch" class="stat-sub"></div>
+          </div>
+          <div id="guess-stat" class="stat" hidden>
+            <div class="stat-label">ホントカナの予想</div>
+            <div id="guess-value" class="stat-value"></div>
+            <div id="guess-sub" class="stat-sub"></div>
+          </div>
+        </div>
+
+        <h3 class="section-title" id="matched-title">見つかった思い込み</h3>
+        <div id="result-list" class="result-list"></div>
+
+        <details id="unsure-wrap" class="subsection" hidden>
+          <summary>「わからない」と答えた項目</summary>
+          <div id="unsure-list" class="result-list compact"></div>
+        </details>
+
+        <div id="clear-wrap" class="subsection clear" hidden>
+          <h3>見抜けていた項目</h3>
+          <ul id="clear-list" class="chips"></ul>
+        </div>
+
+        <section class="zukan">
+          <h3 class="section-title">心のクセ図鑑 <span id="zukan-count"></span></h3>
+          <p class="zukan-lead">遊ぶたびに、見つかった心のクセが図鑑に登録されます（この端末のブラウザだけに保存）。</p>
+          <ul id="zukan-grid" class="zukan-grid"></ul>
+        </section>
+
+        <section class="share">
+          <h3 class="section-title">結果をシェアする</h3>
+          <p id="share-preview" class="share-preview"></p>
+          <div class="share-buttons">
+            <a id="share-x" class="btn share-x" target="_blank" rel="noopener">𝕏 でポスト</a>
+            <a id="share-line" class="btn share-line" target="_blank" rel="noopener">LINE で送る</a>
+            <button id="share-copy" class="btn" type="button">テキストをコピー</button>
+            <button id="share-native" class="btn" type="button" hidden>その他</button>
+          </div>
+        </section>
+
+        <div class="result-actions">
+          <button id="btn-more" class="btn btn-primary" type="button" hidden>もっと質問に答える</button>
+          <button id="btn-restart" class="btn" type="button">もう一回あそぶ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 読み込みエラー -->
+    <section id="screen-error" class="screen" hidden>
+      <h2>データを読み込めませんでした</h2>
+      <p>このアプリは <code>data/items.json</code> を読み込みます。HTMLファイルを直接開いた場合（file://）はブラウザの制限で読み込めないため、ローカルサーバー経由で開いてください。</p>
+      <pre><code>python -m http.server 8000</code></pre>
+      <p>その後 <code>http://localhost:8000/</code> を開きます。</p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>本アプリは科学リテラシー学習のためのプロトタイプです。健康や治療の判断は、必ず医師や専門家に相談してください。</p>
+    <p>参考：<a href="https://gijika.com/" target="_blank" rel="noopener">Gijika.com</a>（疑似科学とされるものの科学性評定サイト）／
+      <a href="https://www.jumonji-u.ac.jp/sscs/ikeda/cognitive_bias/" target="_blank" rel="noopener">錯思コレクション100</a>。
+      解説文は本アプリ独自のもので、各サイトの見解を代表するものではありません。</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
